@@ -1,12 +1,13 @@
 # restate
 
-[![ci-badge]][ci] [![Latest Version]][crates.io]
-
+[![ci-badge]][ci] [![Latest Version]][crates.io] [![docs-badge]][docs]
 
 [ci]: https://github.com/Neo-Ciber94/restate/actions/workflows/ci.yml
 [ci-badge]: https://github.com/Neo-Ciber94/restate/actions/workflows/ci.yml/badge.svg
-[Latest Version]: https://img.shields.io/crates/v/restate.svg
+[latest version]: https://img.shields.io/crates/v/restate.svg
 [crates.io]: https://crates.io/crates/restate
+[docs]: https://docs.rs/restate
+[docs-badge]: https://docs.rs/restate/badge.svg
 
 `restate` is a Rust library that provides a simple way of defining and using finite state machines.
 
