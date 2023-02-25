@@ -7,13 +7,13 @@ pub use private::*;
 use std::{fmt::Debug, marker::PhantomData};
 
 #[doc(hidden)]
-pub struct Node<'a, S, E, Ctx> {
+pub struct Next<'a, S, E, Ctx> {
     next: S,
     is_final: bool,
     action: Option<Box<dyn OnAction<S, E, Ctx> + Send + 'a>>,
 }
 
-impl<S, E, Ctx> Debug for Node<'_, S, E, Ctx>
+impl<S, E, Ctx> Debug for Next<'_, S, E, Ctx>
 where
     S: Debug,
     Ctx: Debug,
@@ -68,7 +68,7 @@ where
 /// ```
 pub struct Machine<'a, S, E, Ctx, F, Step = Build> {
     // A map of state and event transitions to the next state and associated action.
-    transitions: TransitionMap<S, E, Node<'a, S, E, Ctx>>,
+    transitions: TransitionMap<S, E, Next<'a, S, E, Ctx>>,
 
     // The current state of the machine, will be `None` if the machine had not started.
     current: Option<S>,
@@ -145,7 +145,7 @@ where
         self.transitions.insert(
             event,
             from,
-            Node {
+            Next {
                 next: to,
                 action,
                 is_final,
@@ -191,12 +191,12 @@ where
     F: OnTransition<S, E, Ctx>,
 {
     /// Returns the states of the state machine.
-    pub fn states(&self) -> States<'_, S, E, Node<S, E, Ctx>> {
+    pub fn states(&self) -> States<'_, S, E, Next<S, E, Ctx>> {
         self.transitions.states()
     }
 
     /// Returns the events of the state machine.
-    pub fn events(&self) -> Events<'_, S, E, Node<S, E, Ctx>> {
+    pub fn events(&self) -> Events<'_, S, E, Next<S, E, Ctx>> {
         self.transitions.events()
     }
 
@@ -235,7 +235,7 @@ where
         // current state cannot be null
         let state = self.current.as_mut().unwrap();
 
-        let Some(Node {
+        let Some(Next {
             next,
             action,
             is_final,
