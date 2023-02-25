@@ -130,6 +130,7 @@ impl<'a, S, E, Ctx> IntoTransition<'a, S, E, Ctx> for Builder<'a, S, E, Ctx, Can
 }
 
 /// Zero types that represent the state of a transition `Builder`.
+#[doc(hidden)]
 pub(crate) mod private {
     #[derive(Debug, Clone)]
     pub struct Build;

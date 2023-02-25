@@ -281,10 +281,14 @@ impl<S, E> Default for Machine<'_, S, E, (), (), Build> {
     }
 }
 
+/// Zero size markers for the state machine steps.
+#[doc(hidden)]
 pub(crate) mod private {
+    #[doc(hidden)]
     #[derive(Debug, Clone)]
     pub struct Build;
 
+    #[doc(hidden)]
     #[derive(Debug, Clone)]
     pub struct Ready;
 }
