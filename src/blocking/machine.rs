@@ -291,7 +291,7 @@ pub(crate) mod private {
 
 #[cfg(test)]
 mod tests {
-    use crate::blocking::{self_transition, Builder, ContextMut, Machine};
+    use crate::blocking::{Builder, ContextMut, Machine};
 
     #[test]
     fn send_test() {
@@ -308,16 +308,16 @@ mod tests {
         }
 
         let mut sm = Machine::new()
-            .on_next(Builder::new(
-                LightState::On,
-                LightState::Off,
-                LightEvent::TurnOn,
-            ))
-            .on_next(Builder::new(
-                LightState::Off,
-                LightState::On,
-                LightEvent::TurnOff,
-            ))
+            .on_next(
+                Builder::new(LightState::Off)
+                    .on(LightEvent::TurnOn)
+                    .go_to(LightState::On),
+            )
+            .on_next(
+                Builder::new(LightState::On)
+                    .on(LightEvent::TurnOff)
+                    .go_to(LightState::Off),
+            )
             .start(LightState::Off);
 
         assert_eq!(sm.send(LightEvent::TurnOn).unwrap(), LightState::Off);
@@ -330,7 +330,7 @@ mod tests {
         let mut value = 0;
 
         let mut sm = Machine::new()
-            .on_next(self_transition((), ()))
+            .on_next(Builder::self_transition((), ()))
             .on_transition(|_| {
                 value += 1;
             })
@@ -348,7 +348,7 @@ mod tests {
 
         {
             let mut sm = Machine::new()
-                .on_next(self_transition((), ()).action(|_: ContextMut<_, _, _>| {
+                .on_next(Builder::self_transition((), ()).action(|_: ContextMut<_, _, _>| {
                     value += 1;
                 }))
                 .start(());

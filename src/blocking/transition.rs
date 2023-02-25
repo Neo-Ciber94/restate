@@ -44,7 +44,7 @@ pub trait IntoTransition<'a, S, E, Ctx> {
 pub struct Builder<'a, S, E, Ctx, TStep = Build> {
     from: Option<S>,
     to: Option<S>,
-    event: E,
+    event: Option<E>,
     is_final: bool,
     action: Option<Box<dyn OnAction<S, E, Ctx> + Send + 'a>>,
     _marker: PhantomData<TStep>,
@@ -52,26 +52,11 @@ pub struct Builder<'a, S, E, Ctx, TStep = Build> {
 
 impl<'a, S, E, Ctx> Builder<'a, S, E, Ctx, Build> {
     /// Constructs a transition that goes from and start to end state when the given event is emitted.
-    pub fn new(from: S, to: S, event: E) -> Builder<'a, S, E, Ctx, CanBuild>
-    where
-        S: Clone,
-    {
+    pub fn new(from: S) -> Builder<'a, S, E, Ctx, HasFrom> {
         Builder {
             from: Some(from),
-            to: Some(to),
-            event,
-            is_final: false,
-            action: None,
-            _marker: PhantomData,
-        }
-    }
-
-    /// Trigger the transition when the given event happens.
-    pub fn when(event: E) -> Self {
-        Builder {
-            from: None,
             to: None,
-            event,
+            event: None,
             is_final: false,
             action: None,
             _marker: PhantomData,
@@ -83,15 +68,17 @@ impl<'a, S, E, Ctx> Builder<'a, S, E, Ctx, Build> {
     where
         S: Clone,
     {
-        Builder::new(state.clone(), state, event)
+        Builder::new(state.clone()).on(event).go_to(state)
     }
+}
 
-    /// Sets the state from which the transition starts.
-    pub fn from(self, state: S) -> Builder<'a, S, E, Ctx, HasFrom> {
+impl<'a, S, E, Ctx> Builder<'a, S, E, Ctx, HasFrom> {
+    /// Sets the event that trigger this transition.
+    pub fn on(self, event: E) -> Builder<'a, S, E, Ctx, HasEvent> {
         Builder {
-            from: Some(state),
+            from: self.from,
             to: None,
-            event: self.event,
+            event: Some(event),
             is_final: self.is_final,
             action: self.action,
             _marker: PhantomData,
@@ -99,9 +86,9 @@ impl<'a, S, E, Ctx> Builder<'a, S, E, Ctx, Build> {
     }
 }
 
-impl<'a, S, E, Ctx> Builder<'a, S, E, Ctx, HasFrom> {
+impl<'a, S, E, Ctx> Builder<'a, S, E, Ctx, HasEvent> {
     /// Sets the type where the transition goes to.
-    pub fn to(self, state: S) -> Builder<'a, S, E, Ctx, CanBuild> {
+    pub fn go_to(self, state: S) -> Builder<'a, S, E, Ctx, CanBuild> {
         Builder {
             from: self.from,
             to: Some(state),
@@ -133,26 +120,13 @@ impl<'a, S, E, Ctx> Builder<'a, S, E, Ctx, CanBuild> {
 impl<'a, S, E, Ctx> IntoTransition<'a, S, E, Ctx> for Builder<'a, S, E, Ctx, CanBuild> {
     fn into_transition(self) -> Transition<'a, S, E, Ctx> {
         Transition {
-            event: self.event,
             from: self.from.unwrap(),
             to: self.to.unwrap(),
+            event: self.event.unwrap(),
             action: self.action,
             is_final: self.is_final,
         }
     }
-}
-
-/// Returns a transition builder when the given events happen.
-pub fn when<'a, S, E, Ctx>(event: E) -> Builder<'a, S, E, Ctx, Build> {
-    Builder::when(event)
-}
-
-/// Returns a transition builder that make a transition to itself when the given events happen.
-pub fn self_transition<'a, S, E, Ctx>(event: E, state: S) -> Builder<'a, S, E, Ctx, CanBuild>
-where
-    S: Clone,
-{
-    Builder::self_transition(event, state)
 }
 
 /// Zero types that represent the state of a transition `Builder`.
@@ -165,6 +139,9 @@ pub(crate) mod private {
 
     #[derive(Debug, Clone)]
     pub struct HasFrom;
+
+    #[derive(Debug, Clone)]
+    pub struct HasEvent;
 
     #[derive(Debug, Clone)]
     pub struct HasTo;
