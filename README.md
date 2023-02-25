@@ -7,8 +7,6 @@ restate is a Rust library that provides a simple way of defining and using finit
 Add the following to your Cargo.toml file:
 
 ```toml
-Copy code
-
 [dependencies]
 restate = "0.1.0"
 ```
