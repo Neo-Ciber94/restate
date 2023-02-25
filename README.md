@@ -8,7 +8,13 @@ Add the following to your Cargo.toml file:
 
 ```toml
 [dependencies]
-restate = "0.1.0"
+restate = "0.1.0-alpha"
+```
+
+Or use
+
+```bash
+cargo add restate
 ```
 
 ## Usage
