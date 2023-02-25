@@ -1,0 +1,5 @@
+[package]
+name = "restate"
+description = "A simple state machine library"
+version = "0.1.0-alpha"
+edition = "2021"
