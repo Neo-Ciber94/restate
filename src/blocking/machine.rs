@@ -44,14 +44,14 @@ where
 ///
 /// let mut sm = Machine::with_context(0)
 ///     .on_next(
-///         Builder::self_transition(CountEvent::Increment, Active).action(
+///         Builder::self_transition(Active, CountEvent::Increment).action(
 ///             |cx: ContextMut<Active, CountEvent, i32>| {
 ///                 *cx.context += 1;
 ///             },
 ///         ),
 ///     )
 ///     .on_next(
-///         Builder::self_transition(CountEvent::Decrement, Active).action(
+///         Builder::self_transition(Active, CountEvent::Decrement).action(
 ///             |cx: ContextMut<Active, CountEvent, i32>| {
 ///                 *cx.context -= 1;
 ///             },
@@ -348,9 +348,11 @@ mod tests {
 
         {
             let mut sm = Machine::new()
-                .on_next(Builder::self_transition((), ()).action(|_: ContextMut<_, _, _>| {
-                    value += 1;
-                }))
+                .on_next(
+                    Builder::self_transition((), ()).action(|_: ContextMut<_, _, _>| {
+                        value += 1;
+                    }),
+                )
                 .start(());
 
             sm.send(()).unwrap();
@@ -373,14 +375,14 @@ mod tests {
 
         let mut sm = Machine::with_context(0)
             .on_next(
-                Builder::self_transition(CountEvent::Increment, Active).action(
+                Builder::self_transition(Active, CountEvent::Increment).action(
                     |cx: ContextMut<Active, CountEvent, i32>| {
                         *cx.context += 1;
                     },
                 ),
             )
             .on_next(
-                Builder::self_transition(CountEvent::Decrement, Active).action(
+                Builder::self_transition(Active, CountEvent::Decrement).action(
                     |cx: ContextMut<Active, CountEvent, i32>| {
                         *cx.context -= 1;
                     },

@@ -64,7 +64,7 @@ impl<'a, S, E, Ctx> Builder<'a, S, E, Ctx, Build> {
     }
 
     /// Trigger a transition from and state to itself when the given event happens.
-    pub fn self_transition(event: E, state: S) -> Builder<'a, S, E, Ctx, CanBuild>
+    pub fn self_transition(state: S, event: E) -> Builder<'a, S, E, Ctx, CanBuild>
     where
         S: Clone,
     {
